@@ -1,4 +1,6 @@
-﻿namespace FeliGavilanApiCourse;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FeliGavilanApiCourse;
 
 public class Genre
 {
