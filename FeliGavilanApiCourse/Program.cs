@@ -1,20 +1,27 @@
+using FeliGavilanApiCourse;
 using FeliGavilanApiCourse.Data;
+using FeliGavilanApiCourse.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//SERVICES ZONE - BEGIN
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// builder.Services.AddDbContext<AppDbContext>(options =>
+//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(connectionString));
+
+
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddScoped<IGenresRepository, GenresRepository>();
 
-// builder.Services.AddDbContext<AppDbContext>(options =>
-//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlServer(connectionString));
+//SERVICES ZONE - END
 
 var app = builder.Build();
 
@@ -30,25 +37,11 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/api/products", async (AppDbContext db) =>
     await db.Products.ToListAsync());
 
-var summaries = new[]
+app.MapPost("/genres", async (Genre genre, IGenresRepository repository) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+    var id = await repository.Create(genre);
+    return Results.Created($"/genres{id}", genre);
+});
 
 app.Run();
 
