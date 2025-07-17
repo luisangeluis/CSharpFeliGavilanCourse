@@ -1,6 +1,7 @@
 using FeliGavilanApiCourse;
 using FeliGavilanApiCourse.Data;
 using FeliGavilanApiCourse.Repositories;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,9 +36,10 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/api/products", async (AppDbContext db) =>
     await db.Products.ToListAsync());
 
-app.MapPost("/genres", async (Genre genre, IGenresRepository repository) =>
+app.MapPost("/genres", async (Genre genre, IGenresRepository repository, IOutputCacheStore outputCacheStore) =>
 {
     var id = await repository.Create(genre);
+    await outputCacheStore.EvictByTagAsync("genres-get", default);
     return Results.Created($"/genres{id}", genre);
 });
 
@@ -45,7 +47,7 @@ app.MapGet("/genres", async (IGenresRepository repository) =>
 {
     var genres = await repository.GetAll();
     return Results.Ok(genres);
-}).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)));
+}).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("genres-get"));
 
 app.MapGet("/genres/{id:int}", async (int id, IGenresRepository repository) =>
 {
@@ -57,6 +59,21 @@ app.MapGet("/genres/{id:int}", async (int id, IGenresRepository repository) =>
     }
 
     return Results.Ok(genre);
+});
+
+app.MapPut("/genres/{id:int}", async (int id, Genre genre, IGenresRepository repository, IOutputCacheStore outputCacheStore) =>
+{
+    var exists = await repository.Exists(id);
+
+    if (!exists)
+    {
+        return Results.NotFound();
+    }
+    genre.Id = id;
+    await repository.Update(genre);
+    await outputCacheStore.EvictByTagAsync("genres-get", default);
+    return Results.NoContent();
+
 });
 
 app.Run();

@@ -2,7 +2,9 @@
 
 public interface IGenresRepository
 {
+    Task<List<Genre>> GetAll();
     Task<Genre?> GetById(int id);
     Task<int> Create(Genre genre);
-    Task<List<Genre>> GetAll();
+    Task<bool> Exists(int id);
+    Task Update(Genre genre);
 }
