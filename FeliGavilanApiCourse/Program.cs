@@ -11,9 +11,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseSqlServer(connectionString));
 
+//Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Cache
 builder.Services.AddOutputCache();
 
 builder.Services.AddScoped<IGenresRepository, GenresRepository>();
@@ -69,7 +71,9 @@ app.MapPut("/genres/{id:int}", async (int id, Genre genre, IGenresRepository rep
     {
         return Results.NotFound();
     }
+
     genre.Id = id;
+
     await repository.Update(genre);
     await outputCacheStore.EvictByTagAsync("genres-get", default);
     return Results.NoContent();
