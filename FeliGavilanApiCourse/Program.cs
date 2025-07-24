@@ -35,23 +35,25 @@ if (app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection();
 
+var genresEndPoints = app.MapGroup("/genres");
+
 app.MapGet("/api/products", async (AppDbContext db) =>
     await db.Products.ToListAsync());
 
-app.MapPost("/genres", async (Genre genre, IGenresRepository repository, IOutputCacheStore outputCacheStore) =>
+genresEndPoints.MapPost("/", async (Genre genre, IGenresRepository repository, IOutputCacheStore outputCacheStore) =>
 {
     var id = await repository.Create(genre);
     await outputCacheStore.EvictByTagAsync("genres-get", default);
     return Results.Created($"/genres{id}", genre);
 });
 
-app.MapGet("/genres", async (IGenresRepository repository) =>
+genresEndPoints.MapGet("/", async (IGenresRepository repository) =>
 {
     var genres = await repository.GetAll();
     return Results.Ok(genres);
 }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("genres-get"));
 
-app.MapGet("/genres/{id:int}", async (int id, IGenresRepository repository) =>
+genresEndPoints.MapGet("/{id:int}", async (int id, IGenresRepository repository) =>
 {
     var genre = await repository.GetById(id);
 
@@ -63,7 +65,7 @@ app.MapGet("/genres/{id:int}", async (int id, IGenresRepository repository) =>
     return Results.Ok(genre);
 });
 
-app.MapPut("/genres/{id:int}", async (int id, Genre genre, IGenresRepository repository, IOutputCacheStore outputCacheStore) =>
+genresEndPoints.MapPut("/{id:int}", async (int id, Genre genre, IGenresRepository repository, IOutputCacheStore outputCacheStore) =>
 {
     var exists = await repository.Exists(id);
 
@@ -78,6 +80,17 @@ app.MapPut("/genres/{id:int}", async (int id, Genre genre, IGenresRepository rep
     await outputCacheStore.EvictByTagAsync("genres-get", default);
     return Results.NoContent();
 
+});
+
+genresEndPoints.MapDelete("/{id:int}", async (int id, IGenresRepository repository, IOutputCacheStore outputCacheStore) =>
+{
+    var exists = await repository.Exists(id);
+
+    if (!exists) return Results.NotFound();
+
+    await repository.Delete(id);
+    await outputCacheStore.EvictByTagAsync("genres-get", default);
+    return Results.NoContent();
 });
 
 app.Run();

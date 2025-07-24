@@ -11,7 +11,7 @@ public class GenresRepository : IGenresRepository
         this.context = context;
     }
 
-     public async Task<List<Genre>> GetAll()
+    public async Task<List<Genre>> GetAll()
     {
         return await context.Genres.ToListAsync();
         // return await context.Genres.OrderBy(g=>g.Name).ToListAsync();
@@ -20,7 +20,7 @@ public class GenresRepository : IGenresRepository
 
     public async Task<Genre?> GetById(int id)
     {
-        return await context.Genres.FirstOrDefaultAsync(g=>g.Id == id);
+        return await context.Genres.FirstOrDefaultAsync(g => g.Id == id);
     }
 
     public async Task<int> Create(Genre genre)
@@ -33,12 +33,18 @@ public class GenresRepository : IGenresRepository
 
     public async Task<bool> Exists(int id)
     {
-        return await context.Genres.AnyAsync(g=>g.Id == id);
+        return await context.Genres.AnyAsync(g => g.Id == id);
     }
 
     public async Task Update(Genre genre)
     {
-        context.Update(genre);
+        // context.Update(genre);
+        context.Genres.Update(genre);
         await context.SaveChangesAsync();
+    }
+
+    public async Task Delete(int id)
+    {
+        await context.Genres.Where(g => g.Id == id).ExecuteDeleteAsync();
     }
 }
