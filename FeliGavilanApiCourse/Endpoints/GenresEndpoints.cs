@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using FeliGavilanApiCourse.Repositories;
 using Microsoft.AspNetCore.OutputCaching;
 using FeliGavilanApiCourse.DTOs;
+using AutoMapper;
 
 
 namespace FeliGavilanApiCourse.Endpoints;
@@ -20,41 +21,48 @@ public static class GenresEndpoints
         return group;
     }
 
-    static async Task<Ok<List<Genre>>> GetGenres(IGenresRepository repository)
+    static async Task<Ok<List<GenreDTO>>> GetGenres(IGenresRepository repository, IMapper mapper)
     {
         var genres = await repository.GetAll();
-        return TypedResults.Ok(genres);
+        var genresDTO = mapper.Map<List<GenreDTO>>(genres);
+        return TypedResults.Ok(genresDTO);
 
     }
 
-    static async Task<Results<Ok<Genre>, NotFound>> GetById(int id, IGenresRepository repository)
+    static async Task<Results<Ok<GenreDTO>, NotFound>> GetById(int id, IGenresRepository repository,
+    IMapper mapper)
     {
         var genre = await repository.GetById(id);
 
         if (genre is null) return TypedResults.NotFound();
 
-        return TypedResults.Ok(genre);
+        var genreDto = mapper.Map<GenreDTO>(genre);
+
+        return TypedResults.Ok(genreDto);
     }
 
-    static async Task<Created<Genre>> Create(CreateGenreDTO createGenreDTO, IGenresRepository repository, IOutputCacheStore outputCacheStore)
+    static async Task<Created<GenreDTO>> Create(CreateGenreDTO createGenreDTO, IGenresRepository repository,
+    IOutputCacheStore outputCacheStore, IMapper mapper)
     {
-        var genre = new Genre
-        {
-            Name = createGenreDTO.Name
-        };
-        
+        var genre = mapper.Map<Genre>(createGenreDTO);
+
         var id = await repository.Create(genre);
 
         await outputCacheStore.EvictByTagAsync("genres-get", default);
 
-        return TypedResults.Created($"/genres/{id}", genre);
+        var genreDTO = mapper.Map<GenreDTO>(genre);
+
+        return TypedResults.Created($"/genres/{id}", genreDTO);
     }
 
-    static async Task<Results<NotFound, NoContent>> Update(int id, Genre genre, IGenresRepository repository, IOutputCacheStore outputCacheStore)
+    static async Task<Results<NotFound, NoContent>> Update(int id, CreateGenreDTO createGenreDTO, IGenresRepository repository,
+     IOutputCacheStore outputCacheStore, IMapper mapper)
     {
         var exists = await repository.Exists(id);
 
         if (!exists) return TypedResults.NotFound();
+
+        var genre = mapper.Map<Genre>(createGenreDTO);
 
         genre.Id = id;
 

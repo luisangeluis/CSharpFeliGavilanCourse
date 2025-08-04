@@ -23,6 +23,8 @@ builder.Services.AddOutputCache();
 
 builder.Services.AddScoped<IGenresRepository, GenresRepository>();
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 //SERVICES ZONE - END
 
 var app = builder.Build();
