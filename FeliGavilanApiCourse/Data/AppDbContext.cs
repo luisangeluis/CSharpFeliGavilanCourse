@@ -11,9 +11,14 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Genre>().Property(p=>p.Name).HasMaxLength(150);
+        modelBuilder.Entity<Genre>().Property(p => p.Name).HasMaxLength(150);
+
+        modelBuilder.Entity<Actor>().Property(p => p.Name).HasMaxLength(150);
+        modelBuilder.Entity<Actor>().Property(p => p.Picture).IsUnicode(false);
     }
 
     public DbSet<Product> Products { get; set; }
     public DbSet<Genre> Genres { get; set; }
+    
+    public DbSet<Actor> Actors { get; set; }
 }
