@@ -22,6 +22,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddOutputCache();
 
 builder.Services.AddScoped<IGenresRepository, GenresRepository>();
+builder.Services.AddScoped<IActorsRepository, ActorsRepository>();
 
 builder.Services.AddAutoMapper(typeof(Program));
 
