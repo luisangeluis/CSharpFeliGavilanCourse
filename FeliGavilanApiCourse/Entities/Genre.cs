@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FeliGavilanApiCourse;
+namespace FeliGavilanApiCourse.Entities;
 
 public class Genre
 {

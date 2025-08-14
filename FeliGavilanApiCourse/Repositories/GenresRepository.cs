@@ -1,5 +1,6 @@
 ﻿using FeliGavilanApiCourse.Data;
 using Microsoft.EntityFrameworkCore;
+using FeliGavilanApiCourse.Entities;
 
 namespace FeliGavilanApiCourse.Repositories;
 
@@ -47,4 +48,6 @@ public class GenresRepository : IGenresRepository
     {
         await context.Genres.Where(g => g.Id == id).ExecuteDeleteAsync();
     }
+
+    
 }

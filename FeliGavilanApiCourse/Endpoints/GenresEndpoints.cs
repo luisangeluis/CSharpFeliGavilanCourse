@@ -3,6 +3,7 @@ using FeliGavilanApiCourse.Repositories;
 using Microsoft.AspNetCore.OutputCaching;
 using FeliGavilanApiCourse.DTOs;
 using AutoMapper;
+using  FeliGavilanApiCourse.Entities;
 
 
 namespace FeliGavilanApiCourse.Endpoints;

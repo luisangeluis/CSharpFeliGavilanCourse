@@ -1,4 +1,6 @@
-﻿namespace FeliGavilanApiCourse.Repositories;
+﻿using FeliGavilanApiCourse.Entities;
+
+namespace FeliGavilanApiCourse.Repositories;
 
 public interface IGenresRepository
 {
